@@ -1,0 +1,20 @@
+# Ignore the raw datasets
+data/raw/
+
+# Ignore tables and charts that are generated before I 100% want them committed
+outputs/
+
+# Ignore R session & environment files, and IDE artifacts 
+.Rhistory
+.RData
+.Rproj.user/
+*.rds
+*.fst
+
+# Ignore large files, future-proofing against potential use cases like Adobe Parquet
+*.zip
+*.parquet
+
+# Ignore OS junk files
+.DS_Store
+Thumbs.db
