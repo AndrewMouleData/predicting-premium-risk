@@ -1,0 +1,43 @@
+---
+output: github_document
+---
+
+## Data Intake Rules for This Project
+
+### Data Source
+
+This project pulls data from the UK Government’s STATS19 open relational dataset. All three core tables are ingested to ensure clean and complete relational joins:
+
+1. Collisions  
+2. Vehicles  
+3. Casualties  
+
+### Time Window & Year Selection
+
+To maintain relevance to modern road safety conditions and ensure statistical stability, this analysis uses a **10-year span** of fully validated, year-complete data covering January 2015 to December 2024.
+
+- **Data source:** [GOV.UK Road Safety Open Data](https://www.gov.uk/government/statistical-data-sets/road-safety-open-data)  
+- **Exclusions:** All records prior to 2015 and after 2024 are deliberately excluded at ingestion and are not present in the governed raw data layer.
+
+### Path & Format
+
+- **Root path:** `data/raw/`  
+- **Ingestion format:** Only `.csv` files are permitted.
+
+*Note: The contents of `data/raw/` are gitignored.*
+
+### File Storage Structure
+
+Files in `data/raw/` are organised into annual subdirectories, with three files per year corresponding to Collisions, Vehicles, and Casualties.
+
+### File Naming Conventions
+
+The directory structure inside `data/raw/` is standardised and organised by year to facilitate automated iteration and downstream processing.
+
+- Collisions: `data/raw/{year}/collisions.{ext}`  
+- Vehicles: `data/raw/{year}/vehicles.{ext}`  
+- Casualties: `data/raw/{year}/casualties.{ext}`  
+
+### Rules
+
+- **No edits within `data/raw/`:** All data inside `data/raw/` must remain in the exact state in which it was downloaded. This includes, but is not limited to, cleaning, renaming, filtering, or reformatting.
