@@ -14,10 +14,13 @@ This project pulls data from the UK Government’s STATS19 open relational datas
 
 ### Time Window & Year Selection
 
-To maintain relevance to modern road safety conditions and ensure statistical stability, this analysis uses a **10-year span** of fully validated, year-complete data covering January 2015 to December 2024.
+The STATS19 Collisions, Vehicles, and Casualties datasets are each distributed as longitudinal CSV files containing historical records dating back to 1979.
+
+All three datasets are downloaded in full from the official GOV.UK source and stored verbatim in the local raw data directory (`data/raw`).
+
+The analytical scope of this project is restricted to a 10-year window covering January 2015 to December 2024. This time window is enforced during SQL staging and downstream processing, not ingestion. Records outside this period are not included in analytical activities or results.
 
 - **Data source:** [GOV.UK Road Safety Open Data](https://www.gov.uk/government/statistical-data-sets/road-safety-open-data)  
-- **Exclusions:** All records prior to 2015 and after 2024 are deliberately excluded at ingestion and are not present in the governed raw data layer.
 
 ### Path & Format
 
@@ -28,16 +31,18 @@ To maintain relevance to modern road safety conditions and ensure statistical st
 
 ### File Storage Structure
 
-Files in `data/raw/` are organised into annual subdirectories, with three files per year corresponding to Collisions, Vehicles, and Casualties.
+The `data/raw/` directory contains one CSV file per STATS19 dataset (Collisions, Vehicles, Casualties), each representing the full longitudinal extract provided by the source.
+
+No restructuring, splitting, filtering, or value-level modification is performed within the raw data layer.
 
 ### File Naming Conventions
 
-The directory structure inside `data/raw/` is standardised and organised by year to facilitate automated iteration and downstream processing.
+Upon download, the raw data CSV files are assigned consistent, dataset-level filenames to reflect their "master" status and assist ingestion into SQL. This renaming applies only to file names and does not alter file contents in any way.
 
-- Collisions: `data/raw/{year}/collisions.{ext}`  
-- Vehicles: `data/raw/{year}/vehicles.{ext}`  
-- Casualties: `data/raw/{year}/casualties.{ext}`  
+- Collisions: `data/raw/collisions_master.csv`  
+- Vehicles: `data/raw/vehicles_master.csv`  
+- Casualties: `data/raw/casualties_master.csv`  
 
 ### Rules
 
-- **No edits within `data/raw/`:** All data inside `data/raw/` must remain in the exact state in which it was downloaded. This includes, but is not limited to, cleaning, renaming, filtering, or reformatting.
+- **No edits within `data/raw`:** Aside from non-destructive file-level renaming as described above, all data inside `data/raw` must remain identical to the downloaded source files. This includes, but is not limited to, cleaning, column renaming, filtering, splitting, reformatting, or value transformation.
