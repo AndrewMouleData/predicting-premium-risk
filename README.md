@@ -39,7 +39,7 @@ statistical analysis in R, and the communication of business-relevant
 insights in a way that mirrors real-world insurance pricing and
 underwriting workflows.
 
-### Not in scope
+### Not in Scope
 
 - Exposure-adjusted rates (for example per vehicle-mile or per
   registered vehicle)
@@ -47,7 +47,7 @@ underwriting workflows.
 - Causal inference (such as driver age, vehicle brand, or similar
   coincidental factors)
 - Driver behaviour, demographics, or fault attribution beyond what
-  STATS19 supports
+  STATS19 can defensibly support
 
 ## Project Structure
 
@@ -61,7 +61,8 @@ underwriting workflows.
 
 - **data/**
 
-  - **raw/**: Unmodified STATS19 CSV files (gitignored due to size).  
+  - **raw/**: Renamed, but otherwise unmodified STATS19 CSV files
+    (gitignored due to size).  
   - **sample/**: Small representative samples used to demonstrate
     reproducible transformations.
 
@@ -74,12 +75,86 @@ underwriting workflows.
   Supporting documentation covering methodology, assumptions and
   decision rationale.
 
-## Reproducing the analysis
+## Requirements
 
-1.  Download the required STATS19 files (collisions, vehicles,
-    casualties) for the project time window.
-2.  Place the raw CSVs in `data/raw/` (this folder is gitignored by
-    design).
-3.  Run the SQL scripts in `sql/` in numeric order to create staged and
-    aggregated tables.
-4.  Run the R scripts in `r/` to generate summary tables and figures.
+This project is implemented using a PostgreSQL and R-based analytics
+stack. It assumes basic command-line familiarity for raw data ingestion,
+where the PostgreSQL client (`psql`) is used to load local CSV files via
+client-side operations that sit outside the PostgreSQL database server.
+
+### Database
+
+- **PostgreSQL** - *The relational database*
+- **psql** - *psql – PostgreSQL command-line client used for client-side
+  raw CSV ingestion*
+
+### R Environment
+
+- **R (v4.4.3 +)** - *Recommended with RStudio IDE (optional)*
+
+**Required R Packages**
+
+*Note: you may want to install these by running following script:*
+
+`install.packages(c("tidyverse", "DBI", "RPostgres", "knitr", "rmarkdown"))`
+
+- tidyverse
+- DBI
+- RPostgres
+- knitr
+- rmarkdown
+
+## Reproducing the Analysis
+
+To reproduce the analysis locally, follow the steps below.
+
+1.  Download the UK STATS19 master CSV files (Collisions, Vehicles,
+    Casualties) in full from the official GOV.UK source. These files
+    contain all available historical data (1979–present).
+
+2.  Rename the files to the following standardised names:
+
+    - collisions_master.csv
+    - vehicles_master.csv
+    - casualties_master.csv
+
+3.  Place the raw CSV files in the local `data/raw/` directory.  
+    This directory is intentionally gitignored and raw data files are
+    never committed to the repository.
+
+4.  Run the SQL scripts in the `sql/` directory in numeric order to
+    create schemas, ingest raw data, and build staged and analysis-ready
+    tables.  
+    The project time window (January 2015 – December 2024) is applied
+    during the staging phase, not during raw ingestion.
+
+5.  Run the R scripts in the `r/` directory to generate validation
+    checks, summary tables, and figures used in the analysis and
+    documentation.
+
+### Running SQL Raw Ingestion Scripts
+
+Raw data ingestion scripts use the PostgreSQL psql command-line client
+and the client-side command to ingest local CSV files. This is a
+necessity caused by PostgreSQL databases not having access to the
+client’s local file system where the raw source csv data resides. Using
+`psql` inside a shell application bridges this gap by streaming data
+*over* the connection, a capability that scripts executed wholly within
+the database server lack due to security and permission constraints.
+
+Execute the raw ingestion scripts (*02, 04 and 06*) inside`sql/01_raw/`
+from a shell environment (e.g. cmd, PowerShell, Bash) with the working
+directory set to the project root so relative file paths
+(e.g. `data/raw/`) resolve correctly.
+
+*Example command order:*
+
+1.  `cd Predicting-Premium-Risk` - *Sets the shell working directory to
+    the root of the repository so relative file paths resolve
+    correctly.*
+
+2.  `psql -d predicting_premium_risk -f sql/01_raw/02_ingest_raw_collisions.sql` -
+    *Launches the PostgreSQL command-line client and connects to the
+    `predicting_premium_risk` database. Then, executes the specified SQL
+    script file, running its contents sequentially against the connected
+    database.*
