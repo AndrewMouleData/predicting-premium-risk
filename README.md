@@ -75,6 +75,25 @@ underwriting workflows.
   Supporting documentation covering methodology, assumptions and
   decision rationale.
 
+## Data Architecture
+
+The project follows a layered relational structure:
+
+1.  **Raw** (`raw` schema) Exact mirror of the official STATS19 CSV
+    files. All columns stored as TEXT. No filtering or transformation
+    applied.
+
+2.  **Staging** (`stg` schema) Applies the analytical time window
+    (2015–2024), performs explicit type casting, normalises missing
+    values, and enforces relational grain via primary and foreign keys.
+    No aggregation is introduced at this stage. A single source-level
+    anomaly in casualty numbering is acknowledged and handled
+    structurally without dropping records.
+
+3.  **Mart** (`mart` schema) Analysis-ready tables used to construct the
+    frequency × severity risk proxy, with downstream analysis performed
+    in R.
+
 ## Requirements
 
 This project is implemented using a PostgreSQL and R-based analytics
@@ -122,17 +141,20 @@ To reproduce the analysis locally, follow the steps below.
     This directory is intentionally gitignored and raw data files are
     never committed to the repository.
 
-4.  Run the SQL scripts in the `sql/` directory in numeric order to
-    create schemas, ingest raw data, and build staged and analysis-ready
-    tables.  
-    The project time window (January 2015 – December 2024) is applied
-    during the staging phase, not during raw ingestion.
+4.  Run the SQL scripts in numeric order:
+
+- sql/00_setup/
+- sql/01_raw/
+- sql/02_stg/
+
+*Raw ingestion scripts must be executed via psql in a shell Staging,
+constraint and mart scripts execute server-side.*
 
 5.  Run the R scripts in the `r/` directory to generate validation
     checks, summary tables, and figures used in the analysis and
     documentation.
 
-### Running SQL Raw Ingestion Scripts
+## Running SQL Raw Ingestion Scripts
 
 Raw data ingestion scripts use the PostgreSQL psql command-line client
 and the client-side command to ingest local CSV files. This is a
