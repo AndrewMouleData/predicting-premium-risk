@@ -90,9 +90,23 @@ The project follows a layered relational structure:
     anomaly in casualty numbering is acknowledged and handled
     structurally without dropping records.
 
-3.  **Mart** (`mart` schema) Analysis-ready tables used to construct the
-    frequency × severity risk proxy, with downstream analysis performed
-    in R.
+3.  **Mart** (`mart` schema) Constructs analysis-ready business-grain
+    tables used to derive the frequency x severity risk proxy.
+
+This layer:
+
+- Aggregates casualty-level records to vehicle involvement level.
+- Applies heuristic severity weighting across slight, serious, and fatal
+  injuries.
+- Reintroduces the full collision-involved vehicle universe.
+- Decodes categorical variables and bands continuous variables for
+  stable grouping.
+- Aggregates to a final risk profile grain defined by:
+  `(vehicle_type, propulsion_code, engine_capacity_band, vehicle_age_band`)\`.
+
+*All core frequency and severity metrics are calculated in SQL.* *R is
+used exclusively for exploratory analysis, validation, visualisation,
+thresholding, and interpretation.*
 
 ## Requirements
 
@@ -146,6 +160,7 @@ To reproduce the analysis locally, follow the steps below.
 - sql/00_setup/
 - sql/01_raw/
 - sql/02_stg/
+- sql/03_mart/
 
 *Raw ingestion scripts must be executed via psql in a shell Staging,
 constraint and mart scripts execute server-side.*
