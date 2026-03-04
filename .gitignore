@@ -10,6 +10,7 @@ outputs/
 .Rproj.user/
 *.rds
 *.fst
+.Renviron
 
 # Ignore large files, future-proofing against potential use cases like Adobe Parquet
 *.zip
