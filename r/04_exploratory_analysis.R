@@ -104,7 +104,7 @@ message("\n--- 2: Frequency vs severity decomposition ---")
 freq_median     <- median(risk_profiles$frequency_share)
 severity_median <- median(risk_profiles$avg_weighted_severity_per_vehicle)
 
-risk_profiles <- risk_profiles |>
+risk_profiles_quadrants <- risk_profiles |>
   mutate(
     risk_quadrant = case_when(
       frequency_share >= freq_median &
@@ -118,7 +118,7 @@ risk_profiles <- risk_profiles |>
     )
   )
 
-risk_profiles |>
+risk_profiles_quadrants |>
   count(risk_quadrant) |>
   arrange(desc(n)) |>
   print()
@@ -129,7 +129,7 @@ risk_profiles |>
 # ------------------------------------------------------------------------------
 
 message("\n--- 3: Tail-risk segments (high severity / low frequency) ---")
-risk_profiles |>
+risk_profiles_quadrants |>
   filter(risk_quadrant == "Low frequency / High severity") |>
   arrange(desc(avg_weighted_severity_per_vehicle)) |>
   mutate(
@@ -156,7 +156,7 @@ risk_profiles |>
 # ------------------------------------------------------------------------------
 
 message("\n--- 4: Volume-risk segments (high frequency / low severity) ---")
-risk_profiles |>
+risk_profiles_quadrants |>
   filter(risk_quadrant == "High frequency / Low severity") |>
   arrange(desc(frequency_share)) |>
   mutate(
