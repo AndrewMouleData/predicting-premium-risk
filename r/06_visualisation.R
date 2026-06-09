@@ -1,17 +1,21 @@
 # ------------------------------------------------------------------------------
 # 06_visualisation.R
 #
-# Purpose:
+# Purpose
 # - Produce all charts that communicate the analytical findings of this project
 #   in a format suitable for inclusion in the README.
 # - Save figure outputs to outputs/figures/.
 #
 # Design choices:
 # - All interpretive visualisations use risk_profiles_reporting. The coverage
-#   summary chart compares the full, scoped, and reporting datasets to quantify
-#   the trade-off between interpretability and coverage.
+#   summary chart compares eligible vehicle-category profiles before thresholding,
+#   the scoped dataset, and the reporting subset to quantify the trade-off
+#   between interpretability and coverage.
 # - risk_quadrant is derived here on risk_profiles_reporting as it is a
 #   visualisation-layer construct, not a scoping decision.
+# - The frequency vs severity chart is presented first because it most directly
+#   communicates the structure of the frequency x severity proxy across vehicle
+#   profiles.
 # - A minimal ggplot2 theme is applied consistently across all charts via a
 #   single shared theme object defined once at the top of the script, ensuring
 #   visual consistency without repetition.
@@ -27,10 +31,10 @@
 #
 # Outputs:
 #   figures/
-#     01_top_10_risk_profiles.png
-#     02_frequency_severity_quadrants.png
+#     01_frequency_severity_quadrants.png
+#     02_top_10_risk_profiles.png
 #     03_risk_proxy_distribution.png
-#     04_vehicle_type_risk_contribution.png
+#     04_grouped_vehicle_type_risk_contribution.png
 #     05_vehicle_count_distribution.png
 #     06_coverage_summary.png
 # ------------------------------------------------------------------------------
@@ -83,7 +87,7 @@ save_plot <- function(plot, filename, width = 10, height = 6, dpi = 150) {
 
 # ------------------------------------------------------------------------------
 # Quadrant classification
-# Derived here on risk_profiles_reporting for use in chart 2.
+# Derived here on risk_profiles_reporting for use in chart 1.
 # Median splits on frequency_share and avg_weighted_severity_per_vehicle.
 # ------------------------------------------------------------------------------
 
@@ -112,7 +116,57 @@ risk_profiles_reporting <- risk_profiles_reporting |>
   )
 
 # ------------------------------------------------------------------------------
-# Chart 1: Top 10 profiles by risk_proxy_score
+# Chart 1: Frequency vs severity scatter with quadrant overlay
+# Shows the structure of the frequency x severity proxy across reporting profiles.
+# Point size represents profile depth, measured by vehicle_count.
+# ------------------------------------------------------------------------------
+
+frequency_severity_quadrants_plot <- ggplot(
+  risk_profiles_reporting,
+  aes(
+    x      = frequency_share,
+    y      = avg_weighted_severity_per_vehicle,
+    colour = risk_quadrant
+  )
+) +
+  geom_point(alpha = 0.75, size = 3) +
+  geom_vline(
+    xintercept = freq_median,
+    linetype   = "dashed",
+    colour     = "grey50"
+  ) +
+  geom_hline(
+    yintercept = severity_median,
+    linetype   = "dashed",
+    colour     = "grey50"
+  ) +
+  scale_colour_manual(
+    values = c(
+      "High frequency / High severity" = "firebrick",
+      "High frequency / Low severity"  = "darkorange3",
+      "Low frequency / High severity"  = "darkorchid1",
+      "Low frequency / Low severity"   = "steelblue"
+    )
+  ) +
+  labs(
+    title    = "Frequency vs Severity by Vehicle Risk Profile",
+    subtitle = "Each point represents one vehicle profile. Dashed lines show reporting medians.",
+    x        = "Frequency share (share of all collision involvements)",
+    y        = "Avg weighted severity per vehicle",
+    colour   = NULL,
+    caption  = reporting_caption
+  ) +
+  viz_theme
+
+print(frequency_severity_quadrants_plot)
+save_plot(
+  frequency_severity_quadrants_plot,
+  "01_frequency_severity_quadrants.png",
+  height = 7
+)
+
+# ------------------------------------------------------------------------------
+# Chart 2: Top 10 profiles by risk_proxy_score
 # ------------------------------------------------------------------------------
 
 top_10_risk_profiles <- risk_profiles_reporting |>
@@ -145,58 +199,7 @@ top_10_risk_profiles_plot <- ggplot(
   viz_theme
 
 print(top_10_risk_profiles_plot)
-save_plot(top_10_risk_profiles_plot, "01_top_10_risk_profiles.png")
-
-# ------------------------------------------------------------------------------
-# Chart 2: Frequency vs severity scatter with quadrant overlay
-# ------------------------------------------------------------------------------
-
-frequency_severity_quadrants_plot <- ggplot(
-  risk_profiles_reporting,
-  aes(
-    x      = frequency_share,
-    y      = avg_weighted_severity_per_vehicle,
-    colour = risk_quadrant,
-    size   = vehicle_count
-  )
-) +
-  geom_point(alpha = 0.7) +
-  geom_vline(
-    xintercept = freq_median,
-    linetype   = "dashed",
-    colour     = "grey50"
-  ) +
-  geom_hline(
-    yintercept = severity_median,
-    linetype   = "dashed",
-    colour     = "grey50"
-  ) +
-  scale_colour_manual(
-    values = c(
-      "High frequency / High severity" = "firebrick",
-      "High frequency / Low severity"  = "darkorange3",
-      "Low frequency / High severity"  = "darkorchid1",
-      "Low frequency / Low severity"   = "steelblue"
-    )
-  ) +
-  scale_size_continuous(range = c(2, 8)) +
-  labs(
-    title    = "Frequency vs Severity by Vehicle Risk Profile",
-    subtitle = "Each point represents one vehicle profile. Dashed lines show dataset medians.",
-    x        = "Frequency share (share of all collision involvements)",
-    y        = "Avg weighted severity per vehicle",
-    colour   = NULL,
-    size     = "Vehicle count",
-    caption  = reporting_caption
-  ) +
-  viz_theme
-
-print(frequency_severity_quadrants_plot)
-save_plot(
-  frequency_severity_quadrants_plot,
-  "02_frequency_severity_quadrants.png",
-  height = 7
-)
+save_plot(top_10_risk_profiles_plot, "02_top_10_risk_profiles.png")
 
 # ------------------------------------------------------------------------------
 # Chart 3: Risk proxy score distribution
@@ -224,14 +227,29 @@ save_plot(
 )
 
 # ------------------------------------------------------------------------------
-# Chart 4: Aggregate risk contribution by vehicle type
-# Sum of risk_proxy_score per vehicle_type_label expressed as a percentage
-# of total risk — each type's proportional contribution to the overall
-# frequency-severity risk landscape.
+# Chart 4: Aggregate risk contribution by grouped vehicle type
+# Harmonises STATS19 vehicle_type_label values into broader grouped vehicle types
+# before aggregation, so categories are compared at a more consistent level than
+# the source vehicle-type labels allow.
 # ------------------------------------------------------------------------------
 
-vehicle_type_risk_contribution <- risk_profiles_reporting |>
-  group_by(vehicle_type_label) |>
+grouped_vehicle_type_risk_contribution <- risk_profiles_reporting |>
+  mutate(
+    grouped_vehicle_type_label = case_when(
+      vehicle_type_label == "Car" ~ "Car",
+      str_detect(vehicle_type_label, regex("Motorcycle", ignore_case = TRUE)) ~ "Motorcycle",
+      vehicle_type_label %in% c(
+        "Van / Goods 3.5 tonnes mgw or under",
+        "Goods over 3.5t. and under 7.5t",
+        "Goods 7.5 tonnes mgw and over"
+      ) ~ "Van / goods vehicle",
+      vehicle_type_label == "Bus or coach (17 or more pass seats)" ~ "Bus / coach",
+      vehicle_type_label == "Taxi/Private hire car" ~ "Taxi / private hire",
+      vehicle_type_label == "Agricultural vehicle" ~ "Agricultural vehicle",
+      TRUE ~ "Other"
+    )
+  ) |>
+  group_by(grouped_vehicle_type_label) |>
   summarise(
     total_risk_contribution = sum(risk_proxy_score, na.rm = TRUE),
     vehicle_count           = sum(vehicle_count, na.rm = TRUE),
@@ -239,18 +257,22 @@ vehicle_type_risk_contribution <- risk_profiles_reporting |>
   ) |>
   arrange(desc(total_risk_contribution)) |>
   mutate(
-    pct_total_risk     = total_risk_contribution / sum(total_risk_contribution) * 100,
-    vehicle_type_label = fct_reorder(vehicle_type_label, pct_total_risk)
+    pct_total_risk = total_risk_contribution /
+      sum(total_risk_contribution) * 100,
+    grouped_vehicle_type_label = fct_reorder(
+      grouped_vehicle_type_label,
+      pct_total_risk
+    )
   )
 
-vehicle_type_risk_contribution_plot <- ggplot(
-  vehicle_type_risk_contribution,
-  aes(x = vehicle_type_label, y = pct_total_risk)
+grouped_vehicle_type_risk_contribution_plot <- ggplot(
+  grouped_vehicle_type_risk_contribution,
+  aes(x = grouped_vehicle_type_label, y = pct_total_risk)
 ) +
   geom_col(fill = "steelblue") +
   coord_flip() +
   labs(
-    title    = "Aggregate Risk Contribution by Vehicle Type",
+    title    = "Aggregate Risk Contribution by Grouped Vehicle Type",
     subtitle = "Percentage contribution to total risk proxy score, 2015–2024",
     x        = NULL,
     y        = "% of total risk proxy score",
@@ -258,10 +280,10 @@ vehicle_type_risk_contribution_plot <- ggplot(
   ) +
   viz_theme
 
-print(vehicle_type_risk_contribution_plot)
+print(grouped_vehicle_type_risk_contribution_plot)
 save_plot(
-  vehicle_type_risk_contribution_plot,
-  "04_vehicle_type_risk_contribution.png",
+  grouped_vehicle_type_risk_contribution_plot,
+  "04_grouped_vehicle_type_risk_contribution.png",
   height = 7
 )
 
@@ -307,19 +329,34 @@ save_plot(
 
 # ------------------------------------------------------------------------------
 # Chart 6: Coverage summary
-# Compares full, scoped and reporting datasets to quantify the trade-off
-# between interpretability and coverage.
+# Compares eligible vehicle-category profiles before thresholding, the scoped
+# dataset, and the reporting subset to quantify the trade-off between
+# interpretability and coverage.
 # ------------------------------------------------------------------------------
 
+eligible_vehicle_profiles <- risk_profiles |>
+  filter(
+    !vehicle_type %in% OUT_OF_SCOPE_TYPES
+  )
+
+total_vehicles_eligible <- sum(
+  eligible_vehicle_profiles$vehicle_count,
+  na.rm = TRUE
+)
+
 coverage_summary <- tibble(
-  dataset = c("Full dataset", "Scoped", "Reporting"),
+  dataset = c(
+    "Eligible vehicle\ncategories",
+    "Scoped\n>= 500 vehicles",
+    "Reporting\nsubset"
+  ),
   profiles = c(
-    nrow(risk_profiles),
+    nrow(eligible_vehicle_profiles),
     nrow(risk_profiles_scoped),
     nrow(risk_profiles_reporting)
   ),
   vehicles = c(
-    sum(risk_profiles$vehicle_count, na.rm = TRUE),
+    total_vehicles_eligible,
     sum(risk_profiles_scoped$vehicle_count, na.rm = TRUE),
     sum(risk_profiles_reporting$vehicle_count, na.rm = TRUE)
   ),
@@ -327,12 +364,12 @@ coverage_summary <- tibble(
     100,
     round(
       sum(risk_profiles_scoped$vehicle_count, na.rm = TRUE) /
-        sum(risk_profiles$vehicle_count, na.rm = TRUE) * 100,
+        total_vehicles_eligible * 100,
       1
     ),
     round(
       sum(risk_profiles_reporting$vehicle_count, na.rm = TRUE) /
-        sum(risk_profiles$vehicle_count, na.rm = TRUE) * 100,
+        total_vehicles_eligible * 100,
       1
     )
   )
@@ -361,17 +398,17 @@ coverage_summary_plot <- ggplot(
   facet_wrap(~ metric, scales = "free_y") +
   scale_fill_manual(
     values = c(
-      "Full dataset" = "grey70",
-      "Scoped"       = "steelblue",
-      "Reporting"    = "#2c7bb6"
+      "Eligible vehicle\ncategories" = "grey70",
+      "Scoped\n>= 500 vehicles"     = "steelblue",
+      "Reporting\nsubset"           = "#2c7bb6"
     )
   ) +
   labs(
     title    = "Dataset Coverage at Each Scoping Stage",
-    subtitle = "Profiles retained and vehicle coverage across full, scoped and reporting datasets",
+    subtitle = "Profiles retained and vehicle coverage across eligible, scoped and reporting datasets",
     x        = NULL,
     y        = NULL,
-    caption  = "Source: UK STATS19, 2015–2024."
+    caption  = "Source: UK STATS19, 2015–2024. Eligible vehicle categories exclude road users outside the third-party motor insurance scope."
   ) +
   viz_theme
 
