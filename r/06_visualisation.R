@@ -118,7 +118,6 @@ risk_profiles_reporting <- risk_profiles_reporting |>
 # ------------------------------------------------------------------------------
 # Chart 1: Frequency vs severity scatter with quadrant overlay
 # Shows the structure of the frequency x severity proxy across reporting profiles.
-# Point size represents profile depth, measured by vehicle_count.
 # ------------------------------------------------------------------------------
 
 frequency_severity_quadrants_plot <- ggplot(
