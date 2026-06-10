@@ -345,9 +345,9 @@ total_vehicles_eligible <- sum(
 
 coverage_summary <- tibble(
   dataset = c(
-    "Eligible vehicle\ncategories",
-    "Scoped\n>= 500 vehicles",
-    "Reporting\nsubset"
+    "Relevant raw\nprofiles",
+    "Profiles with\n≥= 500 vehicles",
+    "Final reporting\nsubset"
   ),
   profiles = c(
     nrow(eligible_vehicle_profiles),
@@ -397,17 +397,17 @@ coverage_summary_plot <- ggplot(
   facet_wrap(~ metric, scales = "free_y") +
   scale_fill_manual(
     values = c(
-      "Eligible vehicle\ncategories" = "grey70",
-      "Scoped\n>= 500 vehicles"     = "steelblue",
-      "Reporting\nsubset"           = "#2c7bb6"
+      "Relevant raw\nprofiles"          = "grey70",
+      "Profiles with\n≥= 500 vehicles"  = "steelblue",
+      "Final reporting\nsubset"         = "#2c7bb6"
     )
   ) +
   labs(
     title    = "Dataset Coverage at Each Scoping Stage",
-    subtitle = "Profiles retained and vehicle coverage across eligible, scoped and reporting datasets",
+    subtitle = "Profiles retained and vehicle coverage after count thresholding and undefined-profile removal",
     x        = NULL,
     y        = NULL,
-    caption  = "Source: UK STATS19, 2015–2024. Eligible vehicle categories exclude road users outside the third-party motor insurance scope."
+    caption  = "Source: UK STATS19, 2015–2024. Relevant raw profiles exclude road users outside the third-party motor insurance scope."
   ) +
   viz_theme
 
