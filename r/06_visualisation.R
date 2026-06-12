@@ -399,7 +399,7 @@ coverage_summary_plot <- ggplot(
     values = c(
       "Relevant raw\nprofiles"          = "grey70",
       "Profiles with\n≥= 500 vehicles"  = "steelblue",
-      "Final reporting\nsubset"         = "#2c7bb6"
+      "Final reporting\nsubset"         = "darkorange3"
     )
   ) +
   labs(
