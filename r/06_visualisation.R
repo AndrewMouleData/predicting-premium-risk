@@ -345,8 +345,8 @@ total_vehicles_eligible <- sum(
 
 coverage_summary <- tibble(
   dataset = c(
-    "Relevant raw\nprofiles",
-    "Profiles with\n≥= 500 vehicles",
+    "All in-scope\ngrouped profiles",
+    "Profiles with\n≥ 500 vehicles",
     "Final reporting\nsubset"
   ),
   profiles = c(
@@ -397,9 +397,9 @@ coverage_summary_plot <- ggplot(
   facet_wrap(~ metric, scales = "free_y") +
   scale_fill_manual(
     values = c(
-      "Relevant raw\nprofiles"          = "grey70",
-      "Profiles with\n≥= 500 vehicles"  = "steelblue",
-      "Final reporting\nsubset"         = "darkorange3"
+      "All in-scope\ngrouped profiles" = "grey70",
+      "Profiles with\n≥ 500 vehicles"  = "steelblue",
+      "Final reporting\nsubset"        = "darkorange3"
     )
   ) +
   labs(
