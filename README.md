@@ -2,10 +2,11 @@
 # Predicting Premium Risk: UK Road Safety Analytics
 
 This project demonstrates an end-to-end data analytics pipeline using UK
-STATS19 road safety data. It develops a frequency × severity proxy for
-the purpose of assessing relative third-party motor insurance risk, from
-the perspective of an insurer seeking to understand broad risk profiles
-in support of premium pricing decisions.
+STATS19 road safety data. It investigates how, and to what extent, open
+collision, casualty, and vehicle records can be transformed into an
+insurer-relevant relative-risk profiling framework, using a heuristic
+frequency × severity proxy to support third-party motor insurance
+decision-making.
 
 The result is an exploration of how publicly available UK road collision
 data can be used to generate business insights that strengthen
@@ -27,9 +28,10 @@ actuarial assessment of relative third-party motor insurance risk.
 
 ### Business Task
 
-How can UK road safety data be used to estimate the relative risk
-profile of different vehicle characteristics in order to support
-third-party motor insurance premium pricing decisions?
+How, and to what extent, can open UK road safety data be used to
+estimate the relative risk profile of different vehicle characteristics
+in order to support third-party motor insurance premium pricing
+decisions?
 
 ### Context and Scope
 
@@ -239,10 +241,10 @@ direct comparison across views.
 These figures focus on the reporting subset and are used to show the
 project from several complementary angles:
 
-- ranked high-risk profiles
 - the relationship between frequency and severity across profiles
+- ranked high-risk profiles
 - the overall distribution of risk proxy scores
-- aggregate risk contribution by vehicle type
+- aggregate risk contribution by grouped vehicle type
 - the distribution of profile vehicle counts
 - coverage retained across the full, scoped, and reporting datasets
 
@@ -343,10 +345,11 @@ correctly.
 
 ## Report and Findings
 
-The findings here pertain to the final reporting subset as obtained
-through the prior ingestion, cleaning, and subsetting processes. They
-are designed to support comparative interpretation of the most
-statistically meaningful risk profiles in STATS19.
+The findings here pertain to the final reporting subset obtained through
+the prior ingestion, cleaning, validation, and scoping processes. They
+are designed to show how the STATS19-derived analytical framework can
+support relative comparison across better-represented and more
+interpretable vehicle-characteristic profiles.
 
 ### Finding 1: Relative-risk signals emerge in various ways across profiles
 
@@ -564,7 +567,7 @@ STATS19 alone: without an exposure denominator, such as total vehicles
 on the road or mileage exposure, the analysis cannot fully separate low
 observed collision presence from genuinely lower underlying risk.
 
-### Finding 6: The reporting threshold preserves a mainstream risk view, not a complete profile universe
+### Finding 6: Stability and interpretability narrow the final risk landscape
 
 ![Figure 6: Coverage summary](outputs/figures/06_coverage_summary.png)
 Figure 6 illustrates how grouped-profile and individual-vehicle coverage
@@ -642,23 +645,17 @@ collision-involved vehicles surviving thresholding cannot be reliably
 allocated to the characteristic-level profile framework used throughout
 this analysis.
 
-Taking a broad view of these findings, Figure 6 demonstrates that
-STATS19 can support the construction of a stable and interpretable
-characteristic-level risk landscape, but that in seeking more stable,
-granular levels of analysis, substantial reductions in both profile
-coverage and vehicle coverage reduce the completeness of the resulting
-analytical landscape. The minimum profile-count threshold removes many
+Taking a broad view of Figure 6, the final reporting subset represents a
+trade-off between analytical stability, interpretability, and
+completeness. The minimum profile-count threshold removes many
 lower-representation profiles whilst retaining the majority of
 collision-involved vehicles, suggesting that mainstream areas of the
 collision landscape remain well represented. However, the
-reporting-level undefined-profile filter reveals that a meaningful
-proportion of collision-involved vehicles cannot be incorporated into
+reporting-level undefined-profile filter shows that a meaningful
+proportion of threshold-surviving vehicles cannot be incorporated into
 characteristic-level analysis because the requisite descriptive
-information is unavailable. Consequently, the final reporting subset of
-this project cannot and should not be interpreted as a comprehensive map
-of every vehicle profile present within UK collision records. Rather, it
-represents a stable, interpretable view of the better-defined and
-better-represented segments of the UK collision landscape, making it
-suitable for relative risk comparison whilst acknowledging the
-limitations imposed by open data availability and profile
-representation.
+information is unavailable. Consequently, while the final reporting
+subset should not be interpreted as a comprehensive map of every vehicle
+profile present within UK collision records, it nevertheless provides a
+stable, interpretable view of the better-defined and better-represented
+segments of the UK collision landscape.
