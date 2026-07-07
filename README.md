@@ -28,10 +28,10 @@ actuarial assessment of relative third-party motor insurance risk.
 
 ### Business Task
 
-How, and to what extent, can open UK road safety data be used to
-estimate the relative risk profile of different vehicle characteristics
-in order to support third-party motor insurance premium pricing
-decisions?
+Assess whether open UK road safety data can be used to estimate relative
+risk across vehicle characteristics, and, if so, how and to what extent
+those estimates can support third-party motor insurance premium-pricing
+decisions.
 
 ### Context and Scope
 
@@ -142,7 +142,8 @@ between different kinds of high-risk profile. Some profiles may rank
 highly because they appear frequently in the collision data. Others may
 appear less often, but generate materially worse injury outcomes when
 they do. Separating frequency from severity makes that difference
-visible, which allows for greater clarity in the insights this analysis.
+visible, which allows for greater clarity in the insights this analysis
+produces.
 
 ### Risk Metric Construction
 
@@ -518,8 +519,8 @@ distribution](outputs/figures/05_vehicle_count_distribution.png) Figure
 5 shifts the report from interpreting the proxy outputs to assessing the
 evidence base behind them. So far, the primary focus has been on whether
 STATS19 can produce a coherent relative-risk landscape that an insurer
-can use to interpret the context of UK roads. This section now examines
-the robustness of the data underpinning that landscape.
+can use to interpret the risk context of UK roads. This section now
+examines the robustness of the data underpinning that landscape.
 
 Figure 5 shows that, even after applying the minimum reporting threshold
 *(\>= 500)*, `vehicle_count` remains low across many profiles in the
