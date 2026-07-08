@@ -1,8 +1,12 @@
 # Ignore the raw datasets
 data/raw/
 
-# Ignore tables and charts that are generated before I 100% want them committed
-outputs/
+# Ignore generated outputs by default
+outputs/*
+
+# Keep final README-facing figures
+!outputs/figures/
+!outputs/figures/*.png
 
 # Ignore R session & environment files, and IDE artifacts 
 .Rhistory
